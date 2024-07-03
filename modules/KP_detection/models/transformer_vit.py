@@ -166,11 +166,11 @@ def build_transformer_vit(args):
 
     patch_size = args.patch_size
     encoder = create_model("xcit_small_12_p16",
-                               pretrained=False,
-                               num_classes=0,
-                               img_size=args.input_size,
-                               drop_rate=args.vit_dropout,
-                               drop_block_rate=None)
+                            pretrained=False,
+                            num_classes=0,
+                            img_size=args.input_size,
+                            drop_rate=args.vit_dropout,
+                            drop_block_rate=None)
 
     encoder.dim_patches = [encoder.patch_embed.img_size[0] // encoder.patch_embed.patch_size[0],
                                encoder.patch_embed.img_size[1] // encoder.patch_embed.patch_size[1]]

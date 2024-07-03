@@ -15,10 +15,8 @@ class VITDETR(nn.Module):
         Parameters:
             backbone: torch module of the backbone to be used. See backbone.py
             transformer: torch module of the transformer architecture. See transformer.py
-            num_classes: number of object classes
             num_queries: number of object queries, ie detection slot. This is the maximal number of objects
                          DETR can detect in a single image. For COCO, we recommend 100 queries.
-            aux_loss: True if auxiliary decoding losses (loss at each decoder layer) are to be used.
         """
         super().__init__()
         num_points = 2  # 2 for keypoints, 4 for bounding boxes
@@ -50,7 +48,9 @@ class VITDETR(nn.Module):
         # features, pos = self.backbone(samples)
         # src, mask = features[-1].decompose()
         # assert mask is not None
+
         hs,_,attn_list = self.transformer(samples, self.query_embed.weight,return_attn)
+        
         # TODO: For inference only the last transformer block is used (hs[-1])
         # For calculating the loss all blocks are needed.
         # It will save some flops to only pass the MLPs from the last block for inference
@@ -59,10 +59,8 @@ class VITDETR(nn.Module):
         # outputs_class = self.class_embed(hs)
         outputs_coord = self.bbox_embed(hs).sigmoid()
         out = {'pred_boxes': outputs_coord[-1]}
-       
+        
         return out
-        
-        
 
 
 class MLP(nn.Module):
@@ -79,15 +77,17 @@ class MLP(nn.Module):
             x = F.relu(layer(x)) if i < self.num_layers - 1 else layer(x)
         return x
 
+
 class Model(nn.Module):
-    def __init__(self,args):
+    def __init__(self, args):
         super(Model, self).__init__()
-        self.args =args
+        self.args = args
         transformer = build_transformer_vit(args)
         self.model = VITDETR(
-        transformer,
-        num_queries=args.num_queries
-    )
-    def forward(self, x,return_attn = False):
-        return self.model(x,return_attn)
+            transformer,
+            num_queries=args.num_queries
+        )
+
+    def forward(self, x, return_attn = False):
+        return self.model(x, return_attn)
     
